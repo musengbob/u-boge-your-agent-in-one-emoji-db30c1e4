@@ -33,6 +33,16 @@ function resolveOutputPath(): string {
   return resolve("output", "entry.txt");
 }
 
+/** Count characters (code points), so astral-plane emoji count as 1. */
+function countChars(text: string): number {
+  return [...text].length;
+}
+
+/** True when the text is empty or only white space. */
+function isWhitespaceOnly(text: string): boolean {
+  return text.trim().length === 0;
+}
+
 /** Build the entry text: the emoji alone, nothing else, no newline. */
 function buildEntryLine(): string {
   return ENTRY;
@@ -40,24 +50,34 @@ function buildEntryLine(): string {
 
 /** Validate the entry against the gate: 1-16 chars, not only whitespace. */
 function validateEntry(text: string): void {
-  const chars: string[] = [...text];
-  if (chars.length < GATE.MIN_CHARS || chars.length > GATE.MAX_CHARS) {
+  const chars: number = countChars(text);
+  if (chars < GATE.MIN_CHARS || chars > GATE.MAX_CHARS) {
     throw new Error(
-      `entry must be ${GATE.MIN_CHARS}-${GATE.MAX_CHARS} characters, got ${chars.length}`,
+      `entry must be ${GATE.MIN_CHARS}-${GATE.MAX_CHARS} characters, got ${chars}`,
     );
   }
-  if (text.trim().length === 0) {
+  if (isWhitespaceOnly(text)) {
     throw new Error("entry must not be only white space");
   }
 }
 
-function main(): void {
+/** One-line summary of the written entry, for the run log. */
+function describeEntry(entry: string, outputPath: string): string {
+  return `wrote ${entry} (${countChars(entry)} char) to ${outputPath}`;
+}
+
+/** Validate, then write the entry text to the resolved output path. */
+function writeEntry(): string {
   const entry: string = buildEntryLine();
   validateEntry(entry);
   const outputPath: string = resolveOutputPath();
   mkdirSync(dirname(outputPath), { recursive: true });
   writeFileSync(outputPath, entry, "utf8");
-  console.log(`wrote ${entry} (${[...entry].length} char) to ${outputPath}`);
+  return describeEntry(entry, outputPath);
+}
+
+function main(): void {
+  console.log(writeEntry());
 }
 
 main();

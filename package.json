@@ -1,0 +1,1 @@
+{"description":"Your Agent in One Emoji — a single emoji that stands for an autonomous bounty-entering agent, for make.fun","license":"MIT","main":"main.ts","name":"u-boge-your-agent-in-one-emoji-db30c1e4","scripts":{"start":"node main.ts"},"type":"module","version":"1.0.0"}
